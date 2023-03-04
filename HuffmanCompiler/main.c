@@ -58,6 +58,7 @@ NewCode *przejdz_i_nowe_kody(Huffman_node *tree,int i){	// działamy na bitach n
 		kod &= 0b1;
 		kod<<=1;
 	}*/
+	printf("test");
 }
 
 Huffman_node * huffmanAlg(ArraySort *tab,int i){
