@@ -13,4 +13,5 @@ typedef struct toSort{
 typedef struct encoding{
     char old;
     char new;
+    int depth;
 } NewCode;
