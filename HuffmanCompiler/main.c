@@ -127,7 +127,7 @@ NewCode *przejdz_i_nowe_kody(Huffman_node *tree,int i){	// działamy na bitach n
 			coding[j].depth++;
 			przejdz = przejdz->left;
 			buf |=0;
-			if(przejdz->left!=NULL)
+			if(przejdz->left!=NULL||przejdz->right!=NULL)
 				buf <<=1;
 		}
 		else if(przejdz ->right !=NULL && przejdz->left ==NULL){
