@@ -23,26 +23,38 @@ char * zapisz_w_buforze(NewCode *noweKody){ // !!!Jeśli dopiero zapełni 8 bit�
 	char *buffor = calloc(1,sizeof(char));
 	char x;
  	int count=1,i=0,k=0,sum=0,sumTmp=0;
+	int warunek = 1;
 	
 
 	if (plik==NULL){ 
    	 	printf("Unable to open file!");     
 		return NULL;
- 	}
+ 	}    
  	while(!feof(plik)){ 
-  		
+  		printf("ok bro");
+		warunek =1;
 		fread(&x,1,1,plik);   
 		while(x!=noweKody[k].old){
 			k++;
-		}
-		while(k=0){
+			if(k>128){
+				printf("ERROR!!!");
+				return NULL;
+			}   
+		}  
+		sumTmp=sum;
+		sum += noweKody[k].depth;
+		while(warunek == 1){
 			char temp = noweKody[k].new;
-			sumTmp=sum;
-			sum += noweKody[k].depth;
-		
+
 			if(sum<=8){
 				temp <<= (8-sum);
 				buffor[i] |= temp;
+				if(sum==8){
+					i++;
+					sum = 0;
+				}
+				k=0;
+				warunek =0;
 			}
 			else if(sum>8 ){
 				int ka = 8-sumTmp;
@@ -56,14 +68,11 @@ char * zapisz_w_buforze(NewCode *noweKody){ // !!!Jeśli dopiero zapełni 8 bit�
 				
 				sum =0;
 				sum+=reszta;
-				temp = noweKody[k].new;
-				temp <<=(8-reszta);
-				buffor[i] |=temp;
-				k=0;
 			}
 
 		}
  	}  
+	printf("%d",i);
 	fclose(plik);
 	return buffor;
 
@@ -85,7 +94,7 @@ Huffman_node *find_parent_node(Huffman_node *root, Huffman_node *node) {
 
 NewCode *przejdz_i_nowe_kody(Huffman_node *tree,int i){	// działamy na bitach np 00100110 przez operatory << lub >> i & |, code zapisujemy w charze,
 	
-	NewCode * coding = malloc(i*sizeof(NewCode));
+	NewCode * coding = calloc(i,sizeof(NewCode));
 	int j=0;
 			// napewno dobry sposób, przemyślany, na kartce rozpisany ez
 	char buf = 0;
@@ -94,7 +103,7 @@ NewCode *przejdz_i_nowe_kody(Huffman_node *tree,int i){	// działamy na bitach n
 	while(j!=i){
 		if(przejdz->right==NULL && przejdz->left==NULL){
 			if(przejdz->bit!=254){
-				printf("zesraj mi sie na klate");
+				//printf("zesraj mi sie na klate");
 				coding[j].old=przejdz->bit;
 				coding[j].new = buf;
 				j++;
@@ -127,7 +136,7 @@ NewCode *przejdz_i_nowe_kody(Huffman_node *tree,int i){	// działamy na bitach n
 			coding[j].depth++;
 			przejdz = przejdz->left;
 			buf |=0;
-			if(przejdz->left!=NULL||przejdz->right!=NULL)
+			if(przejdz->left!=NULL ||przejdz->right!=NULL)
 				buf <<=1;
 		}
 		else if(przejdz ->right !=NULL && przejdz->left ==NULL){
@@ -139,9 +148,6 @@ NewCode *przejdz_i_nowe_kody(Huffman_node *tree,int i){	// działamy na bitach n
 		}
 		else
 			continue;
-		
-
-
 	}
 
 	return coding;
@@ -192,9 +198,9 @@ Huffman_node * huffmanAlg(ArraySort *tab,int i){
 		
 		array[size]=newnode;
 		printf("przed zmiana!! + size = %d\n",size);
-		for(int a = size;a>=0;a--){
+		/*for(int a = size;a>=0;a--){
 			printf("%d\n",array[a]->frequency);
-		}
+		}*/
 		
 		for(int a = size;a>0;a--){
 			if(array[a]->frequency > array[a-1]->frequency){
@@ -206,10 +212,10 @@ Huffman_node * huffmanAlg(ArraySort *tab,int i){
 			else	
 				break;
 		}
-		printf("po!!\n");
+		/*printf("po!!\n");
 		for(int a = size;a>=0;a--){
 			printf("%d\n",array[a]->frequency);
-		}
+		}*/
 		if(size==0)
 			root=array[size];
 	}		
@@ -286,25 +292,27 @@ int main(int argc,char**argv){
 	//printf("\n\n%d\n\n",fa);  
 	
 	//printf("\n\n\n\n");
+	int abecadlo=0;
 	for(int s = 0; s<fa;s++){
 		printf("%c -- %d\n",przk[s].ch,przk[s].fre);
+		abecadlo++;
 	}
+	printf("\n%d\n\n",fa);
 	
-	Huffman_node *root = huffmanAlg(przk,fa);  //Algorytm Huffmana
+	Huffman_node *root = huffmanAlg(przk,fa+1);  //Algorytm Huffmana
 
 	//printf("\n\n%c\n",root->right->left->right->bit);
 
 	/*poczytac bardziej o operacjach bitowych*/
-	NewCode * newkodes = przejdz_i_nowe_kody(root,fa);  //dodać do strukturt, na jaką głebokosc drzewa, wchodzi dany znak
-		printf("\n\n%c",newkodes[0].old);// !!!!!!!!do naprawienia głebokosc!!!!!!!!
-
+	NewCode * newkodes = przejdz_i_nowe_kody(root,fa+1);  //dodać do strukturt, na jaką głebokosc drzewa, wchodzi dany znak
+	for(int j=0;j<129;j++){
+		printf("%c--%d\n",newkodes[j].old,newkodes[j].depth);
+	}
 	//FILE *compresed;
 	char *buffor=zapisz_w_buforze(newkodes);//!!!!UWaga, dla pliku pdf, nie działa huffmanAlg, (jest segmentation fault)!!!!
-	printf("\n%d",buffor[0]);
+	//printf("\n%d",buffor[0]);
 	return 0;
-
 }
-
 
 
 
